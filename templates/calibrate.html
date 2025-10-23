@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<>
+<head>
+    <title>Camera Calibration</title>
+    <style>
+        canvas { border:2px solid black; }
+    </style>
+</head>
+<body style="text-align:center; font-family:Arial;">
+    <h1>Perspective Calibration</h1>
+    <p>Click 4 points on the road (top-left, top-right, bottom-left, bottom-right).</p>
+
+    {% if image %}
+        <canvas id="canvas"></canvas>
+        <br>
+        <button onclick="saveCalibration()">Save Calibration</button>
+    {% else %}
+        <p>⚠️ No images available yet. Please upload one below for calibration.</p>
+    {% endif %}
+
+    <hr>
+    <h3>📤 Upload Road Image for Calibration</h3>
+    <form action="{{ url_for('upload_for_calibration') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload & Calibrate</button>
+    </form>
+
+    {% if image %}
+    <script>
+        let img = new Image();
+        img.src = "{{ image }}";
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        }
+
+        let points = [];
+        canvas.addEventListener("click", function(e) {
+            if (points.length < 4) {
+                let rect = canvas.getBoundingClientRect();
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                points.push([x, y]);
+
+                ctx.fillStyle = "red";
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2*Math.PI);
+                ctx.fill();
+            }
+        });
+
+        function saveCalibration() {
+            if (points.length !== 4) {
+                alert("Please select exactly 4 points!");
+                return;
+            }
+            fetch("/save_points", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ points: points })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                window.location.href = "/";
+            });
+        }
+    </script>
+    {% endif %}
+    
+    <hr>
+    <a href="{{ url_for('index') }}">
+        <button>⬅ Back to Dashboard</button>
+    </a>
+</body>
+</html>

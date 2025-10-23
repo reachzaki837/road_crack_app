@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Road Crack Detection Dashboard</title>
+    <style>
+        .badge {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .green { background-color: green; }
+        .yellow { background-color: goldenrod; }
+        .red { background-color: red; }
+
+        .gallery img {
+            margin: 5px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body style="text-align:center; font-family:Arial;">
+    <h1>🚗 Road Crack Detection Dashboard</h1>
+
+    {% if image %}
+      <img src="{{ image }}" width="640">
+      <h2>
+        RHI: {{ rhi|round(2) }} |
+        Crack %: {{ crack|round(2) }} |
+        Potholes: {{ potholes }}
+      </h2>
+      <span class="badge {{ alert }}">{{ condition }}</span>
+    {% else %}
+      <p>No image captured yet...</p>
+    {% endif %}
+
+    <h3>📸 Capture Interval: {{ interval }} seconds</h3>
+    <form method="POST">
+        <label>Set New Interval (seconds): </label>
+        <input type="number" name="interval" min="1" required>
+        <button type="submit">Update</button>
+    </form>
+
+    <h3>⚡ Capture Status: {{ "Running" if enabled else "Stopped" }}</h3>
+    <form method="POST">
+        <button type="submit" name="toggle">
+            {{ "Stop Capture" if enabled else "Start Capture" }}
+        </button>
+    </form>
+
+    <hr>
+    <h2>🖼️ Last 5 Captures</h2>
+    <div class="gallery">
+        {% for img in gallery %}
+        <div style="display:inline-block; text-align:center;">
+            <a href="{{ img.path }}" target="_blank">
+                <img src="{{ img.path }}" width="200">
+            </a>
+            <p>RHI: {{ img.rhi }} | {{ img.cond }} | Potholes: {{ img.potholes }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <hr>
+    <!-- 📤 Upload Road Images section START -->
+    <h5>📤 Upload Road Images</h5>
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" multiple required>
+        <button type="submit">Upload & Analyze</button>
+    </form>
+    <!-- 📤 Upload Road Images section END -->
+
+    <hr>
+    <!-- 🔧 Camera Calibration section START -->
+    <h4>🔧 Camera Calibration</h4>
+    <a href="{{ url_for('calibrate') }}">
+        <button>Recalibrate Perspective</button>
+    </a>
+    <!-- 🔧 Camera Calibration section END -->
+
+    <a href="{{ url_for('report') }}">
+        <button style="padding:10px 20px; font-size:16px;">View Report</button>
+    </a>
+    <a href="{{ url_for('download_log') }}">
+        <button style="padding:10px 20px; font-size:16px;">Download Log</button>
+    </a>
+</body>
+
+</html>
