@@ -292,7 +292,7 @@ def cleanup_camera():
     except:
         pass
 
-
+prnt("Hello")
 
 '''
 #Pi-Camera Setup Instructions
