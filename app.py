@@ -35,6 +35,7 @@ def cleanup_camera():
         pass
 
 print("Hello")
+prnt("Hello")
 
 '''
 #Pi-Camera Setup Instructions
